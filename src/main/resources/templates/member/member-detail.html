@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엄마가로아하지말래요</title>
+    <link th:href="@{/css/bootstrap.min.css}" href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/dalsom.css}" href="/static/css/dalsom.css" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/form-css.css}" href="/static/css/form-css.css" rel="stylesheet" type="text/css">
+    <style>
+        .comment-report {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid wrapper d-flex">
+    <aside class="flex-shrink-0 p-3 align-items-center col-2 cotton-color sidebar" th:fragment="aside">
+        <a href="#" th:href="@{/guilds}" class="d-flex align-items-center pb-3 mb-3 text-decoration-none border-bottom">
+            <span class="fs-5 fw-semibold text-black">관리자 메인</span>
+        </a>
+        <ul class="list-unstyled ps-0">
+            <li class="mb-1">
+                <button class="btn align-items-center rounded btn-toggle" data-bs-toggle="collapse"
+                        data-bs-target="#guild-collapse" aria-expanded="true">길드관리
+                </button>
+                <div class="collapse" id="guild-collapse">
+                    <ul class="list-unstyled fw-normal pb-1 small btn-toggle-nav">
+                        <li>
+                            <a href="#" th:href="@{/guilds}" class="link-dark rounded">길드현황</a>
+                        </li>
+                        <li>
+                            <a href="#" class="link-dark rounded">건의사항</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+                <button class="btn align-items-center rounded btn-toggle" data-bs-toggle="collapse"
+                        data-bs-target="#user-collapse" aria-expanded="true">회원관리
+                </button>
+                <div class="collapse" id="user-collapse">
+                    <ul class="list-unstyled fw-normal pb-1 small btn-toggle-nav">
+                        <li>
+                            <a href="#" th:href="@{/members/join}" class="link-dark rounded">회원가입</a>
+                        </li>
+                        <li>
+                            <a href="#" th:href="@{/members}" class="link-dark rounded">회원목록</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+                <button class="btn align-items-center rounded btn-toggle" data-bs-toggle="collapse"
+                        data-bs-target="#admin-collapse" aria-expanded="true">운영진관리
+                </button>
+                <div class="collapse" id="admin-collapse">
+                    <ul class="list-unstyled fw-normal pb-1 small btn-toggle-nav">
+                        <li>
+                            <a href="#" th:href="@{/admins}" class="link-dark rounded">운영진목록</a>
+                        </li>
+                        <li>
+                            <a href="#" th:href="@{/admins/wait}" class="link-dark rounded">운영진가입승인</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </aside>
+    <main class="text-center col-10 overflow-auto">
+        <div class="row p-5">
+            <div class="col-6">
+                <div class="left-head row p-1 ms-5 me-5">
+                    <div class="col-auto">
+                        <h1 th:text="${memberDetail.getMainCharacterName}" id="h1MainCharacter">
+                            GuildMaster
+                        </h1>
+                        <select class="form-control form-select d-none mb-1" id="selectMainCharacter">
+                            <option th:value="${each.characterId}" value="1"
+                                    th:each="each : ${memberDetail.characters}" th:text="${each.characterName}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="justify-content-end align-content-center col" style="display: grid">
+                        <button type="button" class="btn btn-primary" id="btnChangeMainCharacter">본캐변경</button>
+                        <button type="button" class="btn btn-outline-primary d-none"
+                                id="btnChangeMainCharacterSave">저장
+                        </button>
+                    </div>
+                    <hr>
+                </div>
+                <div class="text-start ps-5 pe-5 pt-3">
+                    <input class="hide" type="text" th:value="${memberId}" id="inputMemberId">
+                    <div class="row justify-content-between mb-3  pt-2 pb-2">
+                        <div class="col-auto">
+                            <p class="fw-semibold fs-4 mt-auto mb-auto">
+                                <span>가입일 : </span>
+                                <span id="joinDateSpan"
+                                      th:text="${#temporals.format(memberDetail.joinDate, 'yyyy-MM-dd')}">2020-01-01</span>
+                            </p>
+                            <input class="form-control hide" type="date" id="joinDateInput" value="2020-01-01"
+                                   th:value="${#temporals.format(memberDetail.joinDate, 'yyyy-MM-dd')}">
+                        </div>
+                        <div class="col-auto ps-0 pe-0">
+                            <button class="btn btn-sm btn-light user-detail-btn" id="btnModifyJoinDate"> 수정
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row justify-content-between mb-3  pt-2 pb-2">
+                        <div class="col-auto" style="display: table">
+                            <p class="fw-semibold fs-4 mt-auto mb-auto"
+                               style="display: table-cell; vertical-align: middle">코멘트 수 :
+                                <a id='commentCount'
+                                   onclick="openCommentListModal()"
+                                   th:text="${memberDetail.comments?.size()}"
+                                   class='text-decoration-none' style="cursor: pointer"></a>
+                            </p>
+                        </div>
+                        <div class="col-auto ps-0 pe-0">
+                            <button class="btn btn-sm btn-light col-auto user-detail-btn"
+                                    data-bs-target="#commentModal"
+                                    data-bs-toggle="modal">
+                                코멘트<br> 남기기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row justify-content-between mb-3  pt-2 pb-2">
+                        <div class="col-auto">
+                            <p class="fw-semibold fs-4 mt-auto mb-auto">사사게 수 : 0</p>
+                        </div>
+                        <div class="col-auto ps-0 pe-0">
+                            <button class="btn btn-sm btn-light user-detail-btn" onclick="alert('기능 구현중')">새로고침</button>
+                        </div>
+                    </div>
+
+                    <!-- comment write Modal -->
+                    <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="contentModalTitle">코멘트 남기기</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-2">
+                                        <select class="form-select text-center" name="commentCategory"
+                                                id="commentCategory">
+                                            <option value="COMMENT">비고</option>
+                                            <option value="REPORT">경고</option>
+                                        </select>
+                                    </div>
+                                    <textarea class="form-control" name="test" id="commentTextArea"
+                                              rows="10"></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                    <button type="button" class="btn btn-primary" id="btnCommentSave">저장</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal -->
+
+                    <!-- comment content Modal -->
+                    <div class="modal fade" id="modalCommentContent" tabindex="-1" aria-labelledby="commentModalLabel"
+                         aria-hidden="true" style="z-index: 1062">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalCommentContentTitle">비고</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-2">
+                                        <p id="pCommentAuthor">작성자</p>
+                                    </div>
+                                    <textarea class="form-control" name="test" id="textareaCommentContent"
+                                              disabled rows="10">textarea value</textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal -->
+
+                    <!-- comment list Modal -->
+                    <div class="modal fade" id="modalCommentList" tabindex="-1" aria-labelledby="modalCommentList"
+                         aria-hidden="true" style="z-index: 1061;">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalCommentListTitle"
+                                        th:text="${memberDetail.mainCharacterName}+' 코멘트 목록'">{회원명} 코멘트 목록</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-sm table-hover table-bordered text-center">
+                                        <thead>
+                                        <tr class="table-light">
+                                            <th>#</th>
+                                            <th>종류</th>
+                                            <th>작성자</th>
+                                            <th>작성일</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="tBodyCommentList"></tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal -->
+
+                    <div>
+                        <hr>
+                        <div th:if="${memberDetail.status eq T(com.momc.admin.domain.member.entity.MemberStatus).JOIN}">
+                            <p class="display-6 fw-semibold text-danger">탈퇴 처리</p>
+                            <button class="btn btn-primary" data-bs-target="#leaveModal" data-bs-toggle="modal"
+                                    data-momc-reason="탈퇴">자진 탈퇴
+                            </button>
+                            <button class="btn btn-danger" data-bs-target="#leaveModal" data-bs-toggle="modal"
+                                    data-momc-reason="추방">추방
+                            </button>
+                        </div>
+                        <div th:if="${memberDetail.status ne T(com.momc.admin.domain.member.entity.MemberStatus).JOIN}">
+                            <p class="display-6 fw-semibold text-danger">탈퇴한 회원</p>
+                            <p th:text="'탈퇴일자 : '+${#temporals.format(memberDetail.leaveDate, 'yyyy-MM-dd')}"></p>
+                        </div>
+                    </div>
+
+                    <!-- member leave Modal -->
+                    <div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="leaveModalTitle">탈퇴</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-2">
+                                        <span id="leaveModalBodyTitle">탈퇴 사유</span>
+                                    </div>
+                                    <textarea class="form-control mb-3" name="leaveReasonTextArea"
+                                              id="leaveReasonTextArea" rows="10"></textarea>
+                                    <input class="form-control" type="date" id="leaveDate" name="leaveDate">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소
+                                    </button>
+                                    <button type="button" id="btnLeave" class="btn btn-primary">저장</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal -->
+
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="row p-1 ms-3 me-3">
+                    <div class="col-auto">
+
+                    </div>
+                    <h1>보유 캐릭터 정보 <span class="text-end fs-4 text-muted"
+                                        th:text="${memberDetail.characters?.size()}">7</span></h1>
+                    <hr>
+                </div>
+                <div class="row mt-0">
+                    <div class="card col-3 m-3" th:each="each : ${memberDetail.characters}">
+                        <div class="card-body">
+                            <figure>
+                                <h5 class="card-title mb-0" th:text="${each.characterName}">
+                                    CharacterName
+                                </h5>
+                                <figcaption class="figure-caption" th:text="${each.guildName}">guildName</figcaption>
+                            </figure>
+                            <h6 class="card-subtitle text-muted mb-2" th:text="${each.className}">데빌헌터</h6>
+                            <p class="card-text">
+                                <span th:text="${each.itemLevel}">아이템 레벨 : 1595 </span>
+                            </p>
+                            <a href="https://iloa.gg/character/개발하다샷건침"
+                               th:target="_blank"
+                               th:href="@{'https://iloa.gg/character/'+${each.characterName}}"
+                               class="text-decoration-none m-1" target="_blank"
+                               rel="noopener noreferrer">캐릭터 정보<br>(일로아)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}" src="/static/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/dalsom.js}" src="/static/js/dalsom.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    let comments = /*[[${memberDetail.comments}]]*/ [];
+
+    /*]]>*/
+
+    function openCommentListModal() {
+        let tBody = document.getElementById("tBodyCommentList");
+        tBody.innerHTML = "";
+
+        comments.forEach((each, index) => {
+            let category = each['commentCategory'];
+
+            if (category === "COMMENT") {
+                category = "비고";
+            } else if (category === "REPORT") {
+                category = "경고";
+            } else {
+                category = "탈퇴";
+            }
+
+            let createdDate = moment(each['createdDate']).format('YYYY-MM-DD');
+
+            let tr = document.createElement("tr");
+            tr.innerHTML = `<td>${index + 1}</td>
+                    <td>${category}</td>
+                    <td>${each.author}</td>
+                    <td>${createdDate}</td>`
+
+            if (category !== '비고') {
+                tr.classList.add("comment-report")
+            }
+
+            tr.onclick = function (each) {
+                return () => {
+                    document.getElementById("modalCommentContentTitle").innerText = category;
+                    document.getElementById("pCommentAuthor").innerText = each.author;
+                    document.getElementById("textareaCommentContent").value = each.content;
+                    let contentModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCommentContent"));
+                    contentModal.toggle();
+                }
+            }(each);
+
+            tBody.appendChild(tr);
+        });
+
+        let modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCommentList"));
+        modal.toggle();
+    }
+
+    document.getElementById("btnModifyJoinDate").addEventListener("click", () => {
+        let dateInput = document.getElementById("joinDateInput");
+        let dateSpan = document.getElementById("joinDateSpan");
+        let memberId = document.getElementById("inputMemberId").value;
+
+        if (dateInput.classList.contains("hide")) {
+            dateInput.classList.remove("hide");
+            dateSpan.parentElement.classList.add("hide");
+        } else {
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                    if (httpRequest.status === 200) {
+                        alert("수정 완료");
+                        dateSpan.innerText = dateInput.value;
+                    } else {
+                        console.error(httpRequest.responseText);
+                        alert("수정에 실패하였습니다. 에러 메세지를 확인하세요");
+                    }
+                }
+            };
+
+            let data = {
+                "joinDate": dateInput.value
+            }
+
+            httpRequest.open("PATCH", `/members/${memberId}`);
+            httpRequest.setRequestHeader("content-type", "application/json");
+            httpRequest.send(JSON.stringify(data));
+
+            dateInput.classList.add("hide");
+            dateSpan.parentElement.classList.remove("hide");
+        }
+    })
+
+    document.getElementById("btnCommentSave").addEventListener("click", () => {
+        let commentCategory = document.getElementById("commentCategory");
+        let commentTextArea = document.getElementById("commentTextArea");
+        let memberIdInput = document.getElementById("inputMemberId");
+
+        if (!commentTextArea.value.trim()) {
+            alert("내용을 입력하세요.")
+            return;
+        }
+
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (httpRequest.status === 200) {
+                    let result = JSON.parse(httpRequest.response)["result"];
+                    document.getElementById("commentCount").textContent = result.length
+                    comments = result;
+
+                    commentCategory.value = "COMMENT";
+                    commentTextArea.value = "";
+
+                    alert("등록 완료");
+
+                    let modal = bootstrap.Modal.getInstance(document.getElementById("commentModal"));
+                    modal.toggle();
+                } else {
+                    console.log(httpRequest.responseText);
+                    alert("등록에 실패하였습니다. 에러 메세지를 확인하세요");
+                }
+            }
+        };
+
+        let data = {
+            "commentCategory": commentCategory.value,
+            "content": commentTextArea.value
+        }
+
+        httpRequest.open("POST", `/members/${memberIdInput.value}/comments`);
+        httpRequest.setRequestHeader("content-type", "application/json");
+        httpRequest.send(JSON.stringify(data));
+    });
+
+    let leaveModal = document.getElementById("leaveModal");
+    leaveModal.addEventListener('show.bs.modal', (event) => {
+        setDateValue(leaveModal);
+
+        let relatedTarget = event.relatedTarget;
+        let attribute = relatedTarget.getAttribute("data-momc-reason");
+
+        let title = leaveModal.querySelector("#leaveModalTitle");
+        title.innerHTML = attribute;
+
+        let body = leaveModal.querySelector("#leaveModalBodyTitle");
+        body.innerHTML = `${attribute} 사유`;
+    });
+
+    document.getElementById("btnLeave").addEventListener("click", () => {
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (httpRequest.status === 200) {
+                    alert("등록 성공. 화면을 새로고침 합니다.");
+                    location.reload();
+                } else {
+                    console.log(httpRequest.response);
+                    alert("등록에 실패하였습니다. 에러 메세지를 확인하세요");
+                }
+            }
+        };
+
+        let memberId = document.getElementById("inputMemberId").value;
+        httpRequest.open("DELETE", `/members/${memberId}`);
+
+        let reason = leaveModal.querySelector("#leaveModalTitle").innerHTML === "탈퇴" ? "LEAVE" : "BANNED";
+        let comment = document.getElementById("leaveReasonTextArea").value;
+        let date = document.getElementById("leaveDate").value;
+        let data = {
+            "reason": reason,
+            "commentType": "LEAVE",
+            "comment": comment,
+            "leaveDate": date
+        }
+
+        httpRequest.setRequestHeader("content-type", "application/json");
+        httpRequest.send(JSON.stringify(data));
+    })
+
+    let btnChangeMainCharacter = document.getElementById("btnChangeMainCharacter");
+    let btnChangeMainCharacterSave = document.getElementById("btnChangeMainCharacterSave");
+    let h1MainCharacter = document.getElementById("h1MainCharacter");
+    let selectMainCharacter = document.getElementById("selectMainCharacter");
+
+    document.getElementById("btnChangeMainCharacter").addEventListener("click", function () {
+        btnChangeMainCharacter.classList.add("d-none");
+        btnChangeMainCharacterSave.classList.remove("d-none");
+        h1MainCharacter.classList.add("d-none");
+        selectMainCharacter.classList.remove("d-none");
+    });
+
+    document.getElementById("btnChangeMainCharacterSave").addEventListener("click", function () {
+        let memberId = document.getElementById("inputMemberId").value;
+        let selectedValue = selectMainCharacter.value;
+        let selectedCharacterName = selectMainCharacter.options[selectMainCharacter.selectedIndex].text;
+
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (httpRequest.status === 200) {
+                    h1MainCharacter.innerText = selectedCharacterName;
+                    alert("등록 완료");
+                } else {
+                    console.log(httpRequest.responseText);
+                    alert("등록에 실패하였습니다. 에러 메세지를 확인하세요");
+                }
+            }
+
+            btnChangeMainCharacter.classList.remove("d-none");
+            btnChangeMainCharacterSave.classList.add("d-none");
+            h1MainCharacter.classList.remove("d-none");
+            selectMainCharacter.classList.add("d-none");
+        };
+
+        let url = `/members/${memberId}`;
+        let data = {
+            "mainCharacterId": selectedValue
+        }
+
+        httpRequest.open("PATCH", url);
+        httpRequest.setRequestHeader("content-type", "application/json");
+        httpRequest.send(JSON.stringify(data));
+    });
+</script>
+</body>
+</html>

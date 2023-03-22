@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:href="@{/css/bootstrap.min.css}" href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/dalsom.css}" href="/static/css/dalsom.css" rel="stylesheet" type="text/css">
+    <title>관리자 목록</title>
+</head>
+<body>
+<div class="container-fluid wrapper d-flex">
+    <aside class="flex-shrink-0 p-3 align-items-center col-2 cotton-color sidebar">
+        <a href="#" th:href="@{/guilds}" class="d-flex align-items-center pb-3 mb-3 text-decoration-none border-bottom">
+            <span class="fs-5 fw-semibold text-black">관리자 메인</span>
+        </a>
+        <ul class="list-unstyled ps-0">
+            <li class="mb-1">
+                <button class="btn align-items-center rounded btn-toggle" data-bs-toggle="collapse"
+                        data-bs-target="#guild-collapse" aria-expanded="true">길드관리
+                </button>
+                <div class="collapse" id="guild-collapse">
+                    <ul class="list-unstyled fw-normal pb-1 small btn-toggle-nav">
+                        <li>
+                            <a href="#" th:href="@{/guilds}" class="link-dark rounded">길드현황</a>
+                        </li>
+                        <li>
+                            <a href="#" class="link-dark rounded">건의사항</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+                <button class="btn align-items-center rounded btn-toggle" data-bs-toggle="collapse"
+                        data-bs-target="#user-collapse" aria-expanded="true">회원관리
+                </button>
+                <div class="collapse" id="user-collapse">
+                    <ul class="list-unstyled fw-normal pb-1 small btn-toggle-nav">
+                        <li>
+                            <a href="#" th:href="@{/members/join}" class="link-dark rounded">회원가입</a>
+                        </li>
+                        <li>
+                            <a href="#" th:href="@{/members}" class="link-dark rounded">회원목록</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+                <button class="btn align-items-center rounded btn-toggle" data-bs-toggle="collapse"
+                        data-bs-target="#admin-collapse" aria-expanded="true">운영진관리
+                </button>
+                <div class="collapse" id="admin-collapse">
+                    <ul class="list-unstyled fw-normal pb-1 small btn-toggle-nav">
+                        <li>
+                            <a href="#" th:href="@{/admins}" class="link-dark rounded">운영진목록</a>
+                        </li>
+                        <li>
+                            <a href="#" th:href="@{/admins/wait}" class="link-dark rounded">운영진가입승인</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="text-center col-9 overflow-auto">
+        <div class="p-5">
+            <h1>
+                <span>관리자 목록</span>
+            </h1>
+            <table class="table table-hover align-items-center table-bordered" style="vertical-align: middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width: 5%">#</th>
+                    <th scope="col" style="width: 40%">이름</th>
+                    <th scope="col" style="width: 25%">아이디</th>
+                    <th scope="col">역할</th>
+                    <th scope="col" style="width: 10%">등록일</th>
+                    <th scope="col">삭제</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="each : ${admins}">
+                    <td th:text="${eachStat.count}">1</td>
+                    <td th:text="${each.adminName}">adminName</td>
+                    <td th:text="${each.loginId}">loginId</td>
+                    <td th:text="${each.role.koreanName}">role</td>
+                    <td th:text="${#temporals.format(each.createdDate, 'yyyy-MM-dd HH:mm')}">2022-01-01</td>
+                    <td>
+                        <button class="btn btn-outline-danger btn-delete" th:value="${each.id}">삭제</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal" tabindex="-1" id="spinnerModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>처리중입니다. 잠시만 기다려주세요</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}" src="/static/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    function deleteAdmin(btn) {
+        let url = "/admins";
+        let modal = new bootstrap.Modal(document.getElementById("spinnerModal"));
+        let method = "DELETE";
+        let body = `{"adminId":"${btn.value}"}`;
+
+        return function () {
+            let httpRequest = new XMLHttpRequest();
+
+            httpRequest.onreadystatechange = function () {
+                if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                    if (httpRequest.status === 200) {
+                        alert("삭제 성공")
+                        btn.parentElement.parentElement.remove();
+                    } else {
+                        let response = JSON.parse(httpRequest.response);
+                        alert(response["rspMessage"]);
+                    }
+                    modal.hide();
+                } else {
+                }
+            }
+
+            modal.show();
+
+            httpRequest.open(method, url, true);
+            httpRequest.setRequestHeader("Content-Type", "application/json");
+
+            httpRequest.send(body);
+        };
+    }
+
+    let deleteBtns = document.querySelectorAll(".btn-delete");
+    deleteBtns.forEach(btn => btn.addEventListener("click", deleteAdmin(btn)));
+</script>
+</body>
+</html>

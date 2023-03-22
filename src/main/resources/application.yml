@@ -1,0 +1,33 @@
+spring:
+  profiles:
+    active: dev
+  config:
+    import:
+      classpath:api-keys.yml
+
+momc:
+  api:
+    base-url: https://developer-lostark.game.onstove.com
+    character-path: /characters/{characterName}/siblings
+    character-detail-path: /armories/characters/{characterName}/profiles
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        use_sql_comments: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    url: jdbc:h2:mem:test
+
+momc:
+  init:
+    guild-names: 엄마가로아하지말래요, 아빠가로아몰래하래요, 형이로아하게비키래요

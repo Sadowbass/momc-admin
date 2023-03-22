@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(title, content)">
+<head th:replace="~{layoutTemplate/fragments/fragments :: head (${title}, _)}">
+</head>
+<body>
+<div class="container-fluid wrapper d-flex">
+    <aside class="flex-shrink-0 p-3 align-items-center sidebar"
+           th:replace="layoutTemplate/fragments/fragments :: aside">
+    </aside>
+    <main class="text-center col-9 overflow-auto" th:replace="${content}">
+        <h1>main</h1>
+    </main>
+</div>
+<th:block th:replace="~{layoutTemplate/fragments/fragments :: script(_)}"/>
+</body>
+</html>
+
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layoutWithScript(title, content, script)">
+<head th:replace="~{layoutTemplate/fragments/fragments :: head (${title}, _)}">
+</head>
+<body>
+<div class="container-fluid wrapper d-flex">
+    <aside class="flex-shrink-0 p-3 align-items-center sidebar"
+           th:replace="layoutTemplate/fragments/fragments :: aside">
+    </aside>
+    <main class="text-center col-9 overflow-auto" th:replace="${content}">
+        <h1>main</h1>
+    </main>
+</div>
+<th:block th:replace="~{layoutTemplate/fragments/fragments :: script(${script})}"/>
+</body>
+</html>

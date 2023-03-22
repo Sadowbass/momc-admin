@@ -1,0 +1,30 @@
+.form-box {
+    background-color: #fff;
+    border-radius: 1.5rem;
+    margin: 10rem auto auto;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.form-box form {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-box form > div {
+    width: 50%;
+    margin: auto
+}
+
+::placeholder {
+    text-align: center;
+}
+
+.form-error-text {
+    color: red;
+}
+
+.form-error-text:focus {
+    border-color: red;
+    box-shadow: 0 1px 1px red inset, 0 0 8px red;
+}
