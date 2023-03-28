@@ -26,7 +26,7 @@ public class AdminReadController {
         return "admin/admin-list";
     }
 
-    @GetMapping("/wait")
+    @GetMapping("/waits")
     public String sendWaitingAdminsView(Model model) {
         List<WaitingAdminDto> waitingAdmins = adminReadService.getAllWaitingAdmins();
         model.addAttribute("waitingAdmins", waitingAdmins);

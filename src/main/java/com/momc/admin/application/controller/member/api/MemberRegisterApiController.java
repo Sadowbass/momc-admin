@@ -35,9 +35,6 @@ public class MemberRegisterApiController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BindException.class)
     public ApiResponse handleBindException(BindException e) {
-        log.error(this.getClass().getSimpleName());
-        log.error(e.getMessage());
-
         return ApiResponseFactory.badRequest();
     }
 

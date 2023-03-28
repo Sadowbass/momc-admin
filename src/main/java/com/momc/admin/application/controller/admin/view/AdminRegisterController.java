@@ -1,6 +1,8 @@
 package com.momc.admin.application.controller.admin.view;
 
 import com.momc.admin.application.controller.admin.form.AdminRegisterForm;
+import com.momc.admin.application.controller.common.ApiResponse;
+import com.momc.admin.application.controller.common.ApiResponseFactory;
 import com.momc.admin.application.service.AdminAppService;
 import com.momc.admin.domain.admin.exception.DuplicateAdminIdException;
 import com.momc.admin.domain.admin.service.AdminRegisterService;
@@ -46,16 +48,15 @@ public class AdminRegisterController {
 
     @ResponseBody
     @DeleteMapping
-    public Integer deleteAdmin(@RequestBody Map<String, Integer> adminIdMap) {
+    public ApiResponse deleteAdmin(@RequestBody Map<String, Integer> adminIdMap) {
         Integer id = adminIdMap.get("adminId");
         adminAppService.deleteAdmin(id);
 
-        return id;
+        return ApiResponseFactory.ok(id);
     }
 
     @ExceptionHandler(DuplicateAdminIdException.class)
     public String duplicateIdExceptionHandler(DuplicateAdminIdException e, Model model) {
-        System.out.println("AdminRegisterController.duplicateIdExceptionHandler");
         AdminRegisterForm form = new AdminRegisterForm();
         model.addAttribute(FORM_NAME, form);
 

@@ -15,7 +15,7 @@ public class MemberModifyApiController {
     private final MemberAppService memberAppService;
 
     @PatchMapping("/{memberId}")
-    public ApiResponse modifyJoinDate(@PathVariable Integer memberId, @RequestBody MemberModifyForm form) {
+    public ApiResponse modifyMember(@PathVariable Integer memberId, @RequestBody MemberModifyForm form) {
         memberAppService.modifyMember(memberId, form.getMainCharacterId(), form.getJoinDate());
 
         return ApiResponseFactory.ok();
